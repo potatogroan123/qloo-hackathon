@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
+
+<head>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <meta charset="UTF-8">
+  <title>RizzHelper AI</title>
+  <style>
+    :root {
+      --bg: #f4f4f4;
+      --card: #ffffff;
+      --accent: #007bff;
+      --text: #333333;
+      --high: #ff6961;
+      --medium: #fdbb38;
+      --low: #77dd77;
+      --space-xs: 4px;
+      --space-sm: 8px;
+      --space-md: 16px;
+      --space-lg: 24px;
+      --space-xl: 32px;
+      --radius: 8px;
+      --shadow-light: 0 1px 3px rgba(0, 0, 0, 0.08);
+      --shadow-medium: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .sidebar-content {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+    .panel {
+
+  box-shadow: -4px 0 12px rgba(0, 0, 0, 0.15);
+  border-top-left-radius: 12px;
+  border-bottom-left-radius: 12px;
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 400px;
+  
+  height: 100vh;
+  border-radius: 10px;
+  background: white;
+  box-shadow: -2px 0 10px rgba(0, 0, 0, 0.3);
+  transform: translateX(100%);
+  transition: transform 0.3s ease-in-out;
+ /* z-index: 9999;*/
+  padding: 24px;
+  }
+  .panel h2 {
+  margin-top: 0;
+  margin-bottom: 16px;
+  font-size: 20px;
+}
+
+.panel.show {
+    pointer-events: auto; 
+  transform: translateX(0);
+}
+
+.panel.hidden {
+   transform: translateX(calc(100% - 2px));
+}
+
+
+.toggle-button {
+
+
+  user-select: none;
+  -webkit-user-select: none;
+  width: 30px;
+  height: 30px;
+  background: #007bff;
+  clip-path: polygon(0 0, 100% 50%, 0 100%);
+  position: absolute;
+  top: 50%;
+  left: -25px;
+  transform: translateY(-50%);
+  cursor: pointer;
+   transition: transform 0.3s ease-in-out;
+}
+
+.toggle-button:hover {
+  background: #005dc5;
+}
+.panel.hidden .toggle-button {
+  transition: transform 0.3s ease-in-out;
+  transform: translateX(-28%) rotate(-180deg); 
+}
+
+body {
+  font-family: 'Inter';
+  margin: 0;
+  padding: 20px;
+  color: #333;
+}
+
+input,
+select,
+textarea,
+button {
+    margin-top: 5px;
+  width: 100%;
+  box-sizing: border-box;
+  font-size: 14px;
+  padding: 12px 14px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  background: #fff;
+  color: #333;
+  transition: border 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+}
+
+
+#output p,
+#output ul,
+#output ol,
+#output li,
+#output h1, #output h2, #output h3, #output h4, #output h5, #output h6 {
+  margin: 0.2em 0 0.2em 0;
+  padding: 0;
+}
+#output ul, #output ol {
+  padding-left: 1.1em;
+}
+#output li {
+  margin-left: 0;
+}
+
+
+/* Hover state */
+input:hover,
+select:hover,
+textarea:hover {
+  border-color: #007bff;
+}
+
+/* Focus state */
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: #007bff;
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(0, 123, 255, 0.15);
+}
+
+/* Button base */
+button {
+  background-color: #007bff;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: background 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* Button hover */
+button:hover {
+  background-color: #005dc5;
+   outline: 2px solid #000000;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Button active (click) */
+button:active {
+  background-color: #004aad;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.15);
+}
+
+/* Disabled state */
+button:disabled,
+input:disabled,
+select:disabled,
+textarea:disabled {
+  background-color: #e9ecef;
+  color: #aaa;
+  cursor: not-allowed;
+}
+
+
+#output {
+  margin-top:5px;
+  background: #f4f4f4;
+  
+  transition: border 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+  border: 1px solid #000000;
+  padding: 12px;
+  border-radius: 8px;
+  font-family: 'Inter';
+  font-size: 13px;
+
+  min-height: 100px;
+}
+
+
+  </style>
+</head>
+
+<body>
+
+  <div id="sidebar" class="panel show">
+      <button onclick ="togglePanel()" id="toggleButton" class="toggle-button"></button>
+    <h2>RizzHelper AI 💬</h2>
+
+<!-- 🔍 Personal Info Inputs -->
+  <!--<button onclick="window.electronAPI.minimize()">Minimize</button>
+  This one minimizes to taskbar but i do not want it anymore
+  -->
+
+  <!-- 
+  <select class = "primary">
+  <option value="urn:entity:movie">Movies</option>
+  <option value="urn:entity:tv">TV Shows</option>
+  <option value="urn:entity:music">Music</option>
+  <option value="urn:entity:restaurant">Restaurants</option>
+  <option value="urn:entity:brand">Brands</option>
+  <option value="urn:entity:book">Books</option>
+  <option value="urn:entity:celebrity">Celebrities</option>
+  <option value="urn:entity:activity">Activities</option>
+  <option value="urn:entity:sport">Sports</option>
+  
+  add more as needed -->
+</select>
+
+  <button onclick="toggleUserInfo()" style="margin-top: 16px;">🔎 Show Info</button>
+  <div id="userDataPanel" style="display: none; margin-top: 5px;font-family: 'Inter'; background: #f4f4f4; border-radius: 8px;">
+  <strong>Known Info:</strong>
+<textarea id="userInfoText" style="width: 100%; height: 150px; margin-top: 5px;"></textarea>
+<button id ="saveButton" onclick="saveUserData()" style="margin-top: 8px;">💾 Save Info</button>
+
+</div>
+
+
+  <button onclick="QlooInfo()">Suggest new topic</button>
+  
+
+  <!-- 💬 Convo + Rizz -->
+  <button onclick="generate()">Analyze</button>
+
+  <div id="output"></div>
+
+
+
+  </div>
+    <script>
+   
+
+
+ 
+
+async function QlooInfo() {
+  document.getElementById("output").innerText = "Thinking of other topics...";
+  const raw = document.getElementById("userInfoText").value;
+const arr = raw.split(',').map(e => e.trim()).filter(Boolean);
+
+  try {
+    console.log("Sending to Qloo:", arr);
+    const res = await fetch('http://localhost:3000/get-qloo', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ query: arr })
+    });
+    
+    const data = await res.json();
+    console.log(JSON.stringify(data, null, 2));
+
+    // data.topNames is a string (possibly empty)
+    if (data && data.topNames && data.topNames.length > 0) {
+      document.getElementById("output").innerText =
+        "Qloo recommends:\n" + data.topNames;
+    } else {
+      document.getElementById("output").innerText = "No recommendations found.";
+    }
+
+  } catch (err) {
+    console.error(err);
+    document.getElementById("output").innerText = "❌ Qloo failed.";
+  }
+}
+
+
+
+
+
+
+// GPT analysis
+async function generate() {
+  /*const name = document.getElementById("name").value || "They";
+  const age = document.getElementById("age").value || "unknown age";
+  const gender = document.getElementById("gender").value || "unspecified";
+  const vibe = document.getElementById("vibe").value || "chill";
+*/
+  document.getElementById("output").innerText = "Thinking of responses...";
+
+  try {
+    const res = await fetch('/api/generate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+     // body: JSON.stringify({ name, age, gender, vibe, relatedTaste })
+    });
+    const data = await res.json();
+    const cleaned = data.response.replace(/\n{2,}/g, '\n');
+    const markedMessage= marked.parse(cleaned);
+    document.getElementById("output").innerHTML = markedMessage;
+        await fetchUserData();
+  } catch (err) {
+    console.error(err);
+    document.getElementById("output").innerText = "❌ GPT failed.";
+  }
+}
+
+      function togglePanel() {
+    const panel = document.getElementById("sidebar");
+  if (panel.classList.contains("show")) {
+    panel.classList.remove("show");
+    panel.classList.add("hidden");
+  } else {
+    panel.classList.remove("hidden");
+    panel.classList.add("show");
+  }
+  }
+async function toggleUserInfo() {
+  const panel = document.getElementById('userDataPanel');
+  const isVisible = panel.style.display === 'block';
+
+  if (isVisible) {
+    panel.style.display = 'none';
+  } else {
+    panel.style.display = 'block';
+    await fetchUserData();
+  }
+}
+
+async function fetchUserData() {
+  try {
+    const res = await fetch('http://localhost:3000/data/person.txt');
+    const text = await res.text();
+    document.getElementById("userInfoText").value =  text.trim()  || "No data yet.";
+  } catch (err) {
+    document.getElementById("userInfoText").value = "❌ Failed to load.";
+  }
+}
+async function saveUserData() {
+   const btn = document.getElementById("saveButton")
+  const newText = document.getElementById("userInfoText").value;
+  try {
+    await fetch('http://localhost:3000/save-info', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ content: newText })
+    });
+   btn.innerText  = "✅ Info saved!";
+   btn.disabled = true;
+   setTimeout(() => {
+      btn.innerText = "💾 Save Info";
+      btn.disabled = false;
+    }, 1000);
+    
+  } catch (err) {
+   
+    btn.innerText  = " Failed to save ";
+    btn.disabled = true;
+        setTimeout(() => {
+      btn.innerText = "💾 Save Info";
+      btn.disabled = false;
+    }, 1000);
+    console.error(err);
+  }
+}
+
+
+
+
+  </script>
+</body>
+</html>
