@@ -1,0 +1,1 @@
+// all info u know about them will be in here make sure u put it into a folder named data
